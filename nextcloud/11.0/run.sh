@@ -16,6 +16,21 @@ for dir in /nextcloud /data /config /apps2 /etc/nginx /etc/php7 /var/log /var/li
   fi
 done
 
+#Wait until the database is running
+if [ $DB_TYPE = pgsql ]; then
+       until pg_isready -h DB_HOST; do
+              >&2 echo "Not yet starting instance: Postgres host:$DB_HOST is not (yet) available - retry in 1s"
+              sleep 1
+       done
+fi
+
+if [ $DB_TYPE = mysql ]; then
+       until mysqladmin ping -h"$DB_HOST" --silent; do
+              >&2 echo "Not yet starting instance: mysql host:$DB_HOST is not (yet) available - retry in 1s"
+              sleep 1
+       done
+fi
+
 if [ ! -f /config/config.php ]; then
     # New installation, run the setup
     /usr/local/bin/setup.sh
