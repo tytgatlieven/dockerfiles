@@ -68,6 +68,8 @@ RUN echo "@commuedge https://nl.alpinelinux.org/alpine/edge/community" >> /etc/a
     php7-redis@testing \
     php7-pear@commuedge \
     php7-dev@commuedge \
+    mysql-client \
+    postgresql \
  && sed -i "$ s|\-n||g" /usr/bin/pecl && pecl install smbclient \
  && cd /tmp && wget -q http://ftp.gnu.org/pub/gnu/libiconv/libiconv-${GNU_LIBICONV_VERSION}.tar.gz \
  && tar xzf libiconv-${GNU_LIBICONV_VERSION}.tar.gz && cd libiconv-${GNU_LIBICONV_VERSION} \
