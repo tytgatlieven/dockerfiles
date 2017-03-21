@@ -1,6 +1,7 @@
 #!/bin/sh
 
 sed -i -e "s/<UPLOAD_MAX_SIZE>/$UPLOAD_MAX_SIZE/g" /etc/nginx/nginx.conf /etc/php7/php-fpm.conf \
+       -e "s/<PHP_MEMORY_LIMIT>/$PHP_MEMORY_LIMIT/g" /etc/nginx/nginx.conf /etc/php7/php-fpm.conf \
        -e "s/<APC_SHM_SIZE>/$APC_SHM_SIZE/g" /etc/php7/conf.d/apcu.ini \
        -e "s/<OPCACHE_MEM_SIZE>/$OPCACHE_MEM_SIZE/g" /etc/php7/conf.d/00_opcache.ini \
        -e "s/<REDIS_MAX_MEMORY>/$REDIS_MAX_MEMORY/g" /etc/redis.conf \
@@ -43,6 +44,17 @@ else
         occ maintenance:mode --off
         echo "...which seemed to work."
     fi
+fi
+
+#This config allows easy setup when running behind nginx-proxy with nginx-gen container
+# update the trusted_domain to the VIRTUAL_HOST if defined
+if [ ! -z $VIRTUAL_HOST ]; then
+    sed -i "s/localhost/$VIRTUAL_HOST/g" /config/config.php
+fi
+
+# if LETSENCRYPT_HOST is defined we assume we are using https
+if [ ! -z $LETSENCRYPT_HOST ]; then
+    sed -i "s/http:/https:/g" /config/config.php
 fi
 
 exec su-exec $UID:$GID /bin/s6-svscan /etc/s6.d

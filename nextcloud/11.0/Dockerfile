@@ -1,7 +1,7 @@
 FROM alpine:edge
 MAINTAINER Wonderfall <wonderfall@schrodinger.io>
 
-ARG NEXTCLOUD_VERSION=11.0.0beta
+ARG NEXTCLOUD_VERSION=11.0.2
 ARG GNU_LIBICONV_VERSION=1.14
 ARG GPG_nextcloud="2880 6A87 8AE4 23A2 8372  792E D758 99B9 A724 937A"
 
@@ -14,7 +14,8 @@ ENV UID=991 GID=991 \
     TZ=Etc/UTC \
     DB_TYPE=sqlite3 \
     ADMIN_USER=admin \
-    ADMIN_PASSWORD=admin
+    ADMIN_PASSWORD=admin \
+    PHP_MEMORY_LIMIT=4G
 
 RUN echo "@commuedge https://nl.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories \
  && echo "@testing https://nl.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories \
@@ -26,8 +27,12 @@ RUN echo "@commuedge https://nl.alpinelinux.org/alpine/edge/community" >> /etc/a
     automake \
     libtool \
     samba-dev" \
+ && apk -U upgrade \
  && apk -U add \
     ${BUILD_DEPS} \
+#    file \
+#    libpng \
+#    libgd \
     nginx \
     s6 \
     libressl \
