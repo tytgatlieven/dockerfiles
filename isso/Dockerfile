@@ -1,7 +1,6 @@
-FROM alpine:3.4
-MAINTAINER Wonderfall <wonderfall@schrodinger.io>
+FROM alpine:3.5
 
-ARG ISSO_VER=0.10.5
+ARG ISSO_VER=0.10.6
 
 ENV GID=1000 UID=1000
 
@@ -9,21 +8,20 @@ RUN echo "@community https://nl.alpinelinux.org/alpine/v3.4/community" >> /etc/a
  && BUILD_DEPS=" \
     python-dev \
     libffi-dev \
-    py-pip \
+    py2-pip \
     build-base" \
  && apk -U add \
     ${BUILD_DEPS} \
     python \
     py-setuptools \
     sqlite \
-    openssl \
+    libressl \
     ca-certificates \
     su-exec \
     tini@community \
  && pip install --no-cache cffi \
  && pip install --no-cache misaka==1.0.2 \
- && wget https://github.com/posativ/isso/releases/download/$ISSO_VER/isso-$ISSO_VER.tar.gz -P /tmp \
- && pip install /tmp/isso-$ISSO_VER.tar.gz \
+ && pip install --no-cache "isso==${ISSO_VER}" \
  && apk del ${BUILD_DEPS} \
  && rm -rf /var/cache/apk/* /tmp/*
 
@@ -34,5 +32,7 @@ RUN chmod +x /usr/local/bin/run.sh
 EXPOSE 8080
 
 VOLUME /db /config
+
+LABEL maintainer="Wonderfall <wonderfall@targaryen.house>"
 
 CMD ["run.sh"]

@@ -1,42 +1,35 @@
 ## wonderfall/nextcloud
 
+
 [![](https://images.microbadger.com/badges/version/wonderfall/nextcloud.svg)](http://microbadger.com/images/wonderfall/nextcloud "Get your own version badge on microbadger.com") [![](https://images.microbadger.com/badges/image/wonderfall/nextcloud.svg)](http://microbadger.com/images/wonderfall/nextcloud "Get your own image badge on microbadger.com")
+
+[![](https://images.microbadger.com/badges/version/wonderfall/nextcloud:daily.svg)](https://microbadger.com/images/wonderfall/nextcloud:daily "Get your own version badge on microbadger.com") [![](https://images.microbadger.com/badges/image/wonderfall/nextcloud:daily.svg)](https://microbadger.com/images/wonderfall/nextcloud:daily "Get your own image badge on microbadger.com")
+
+[![](https://images.microbadger.com/badges/version/wonderfall/nextcloud:11.0.svg)](https://microbadger.com/images/wonderfall/nextcloud:11.0 "Get your own version badge on microbadger.com") [![](https://images.microbadger.com/badges/image/wonderfall/nextcloud:11.0.svg)](https://microbadger.com/images/wonderfall/nextcloud:11.0 "Get your own image badge on microbadger.com")
 
 ![](https://s32.postimg.org/69nev7aol/Nextcloud_logo.png)
 
+**This image was made for my own use and I have no intention to make this official. Support won't be regular so if there's an update, or a fix, you can open a pull request. Any contribution is welcome, but please be aware I'm very busy currently. Before opening an issue, please check if there's already one related. Also please use Github instead of Docker Hub, otherwise I won't see your comments. Thanks.**
+
 ### Features
 - Based on Alpine Linux Edge.
-- Bundled with nginx and PHP 7.
+- Bundled with nginx and PHP 7.1.
 - Automatic installation using environment variables.
-- Package integrity and authenticity checked during building process.
+- Package integrity (SHA512) and authenticity (PGP) checked during building process.
 - Data and apps persistence.
-- OPCache (opcocde), APCu (local), Redis (file locking) installed and configured.
+- OPCache (opcocde), APCu (local) installed and configured.
 - system cron task running.
 - MySQL, PostgreSQL (server not built-in) and sqlite3 support.
-- Redis, FTP, SMB, LDAP support.
+- Redis, FTP, SMB, LDAP, IMAP support.
 - GNU Libiconv for php iconv extension (avoiding errors with some apps).
 - No root processes. Never.
 - Environment variables provided (see below).
 
-### Notes
-- [It has been reported](https://github.com/Wonderfall/dockerfiles/issues/37) that this image might not work well with old versions of aufs. Please update aufs to 4.x or later, or use overlay/btrfs as a replacement.
-- HTTP port has recently changed, it's now **8888**. You will have to modify your reverse proxy settings.
-- A Redis sever is now running, so you may want to configure it for file locking cache if your config.php was not generated recently. [For best performance it is recommended by Nextcloud documentation](https://docs.nextcloud.com/server/10/admin_manual/configuration_server/caching_configuration.html#additional-notes-for-redis-vs-apcu-on-memory-caching). Add the following lines to your `config.php` :
-
-```
-  'memcache.locking' => '\OC\Memcache\Redis',
-   'redis' => array(
-        'host' => '/tmp/redis.sock',
-        'port' => 0,
-        'timeout' => 0.0,
-         ),
-```
-
 ### Tags
-- **latest** : latest stable version.
-- **11.0** : latest 11.0.x version (**still in beta**)
-- **10.0** : latest 10.0.x version (stable)
-- **9.0** : latest 9.0.x version. (old stable) (unmaintained by this project)
+- **latest** : latest stable version. (11.0)
+- **11.0** : latest 11.0.x version (stable)
+- **10.0** : latest 10.0.x version (old stable) (unmaintained)
+- **9.0** : latest 9.0.x version. (old stable) (unmaintained)
 - **daily** : latest code (daily build).
 
 Other tags than `daily` are built weekly. For security reasons, you should occasionally update the container, even if you have the latest version of Nextcloud.
@@ -52,11 +45,12 @@ Other tags than `daily` are built weekly. For security reasons, you should occas
 - **UPLOAD_MAX_SIZE** : maximum upload size *(default : 10G)*
 - **APC_SHM_SIZE** : apc memory size *(default : 128M)*
 - **OPCACHE_MEM_SIZE** : opcache memory size in megabytes *(default : 128)*
-- **REDIS_MAX_MEMORY** : memory limit for Redis *(default : 64mb)*
 - **CRON_PERIOD** : time interval between two cron tasks *(default : 15m)*
+- **CRON_MEMORY_LIMIT** : memory limit for PHP when executing cronjobs *(default : 1024m)*
 - **TZ** : the system/log timezone *(default : Etc/UTC)*
-- **ADMIN_USER** : username of the admin account *(default : admin)*
-- **ADMIN_PASSWORD** : password of the admin account *(default : admin)*
+- **ADMIN_USER** : username of the admin account *(default : none, web configuration)*
+- **ADMIN_PASSWORD** : password of the admin account *(default : none, web configuration)*
+- **DOMAIN** : domain to use during the setup *(default : localhost)*
 - **DB_TYPE** : database type (sqlite3, mysql or pgsql) *(default : sqlite3)*
 - **DB_NAME** : name of database *(default : none)*
 - **DB_USER** : username for database *(default : none)*
@@ -72,7 +66,7 @@ Don't forget to use a **strong password** for the admin account!
 - **/data** : Nextcloud data.
 - **/config** : config.php location.
 - **/apps2** : Nextcloud downloaded apps.
-- **/var/lib/redis** : Redis dumpfile location.
+- **/nextcloud/themes** : Nextcloud themes location.
 
 ### Database
 Basically, you can use a database instance running on the host or any other machine. An easier solution is to use an external database container. I suggest you to use MariaDB, which is a reliable database server. You can use the official `mariadb` image available on Docker Hub to create a database container, which must be linked to the Nextcloud container. PostgreSQL can also be used as well.
@@ -95,15 +89,16 @@ docker run -d --name nextcloud \
        -v /mnt/nextcloud/data:/data \
        -v /mnt/nextcloud/config:/config \
        -v /mnt/nextcloud/apps:/apps2 \
+       -v /mnt/nextcloud/themes:/nextcloud/themes \
        -e UID=1000 -e GID=1000 \
        -e UPLOAD_MAX_SIZE=10G \
        -e APC_SHM_SIZE=128M \
        -e OPCACHE_MEM_SIZE=128 \
-       -e REDIS_MAX_MEMORY=64mb \
        -e CRON_PERIOD=15m \
        -e TZ=Etc/UTC \
        -e ADMIN_USER=mrrobot \
        -e ADMIN_PASSWORD=supercomplicatedpassword \
+       -e DOMAIN=cloud.example.com \
        -e DB_TYPE=mysql \
        -e DB_NAME=nextcloud \
        -e DB_USER=nextcloud \
@@ -112,20 +107,14 @@ docker run -d --name nextcloud \
        wonderfall/nextcloud:10.0
 ```
 
+You are **not obliged** to use `ADMIN_USER` and `ADMIN_PASSWORD`. If these variables are not provided, you'll be able to configure your admin acccount from your browser.
+
 **Below you can find a docker-compose file, which is very useful!**
 
 Now you have to use a **reverse proxy** in order to access to your container through Internet, steps and details are available at the end of the README.md. And that's it! Since you already configured Nextcloud through setting environment variables, there's no setup page.
 
 ### ARM-based devices
-This image is available for `armhf` (Raspberry Pi 1 & 2, Scaleway C1, ...). Although Docker does support ARM-based devices, Docker Hub only builds for x86_64. That's why you will have to build this image yourself! Don't panic, this is easy.
-
-```
-git clone https://github.com/Wonderfall/dockerfiles.git
-cd dockerfiles/nextcloud/10.0-armhf
-docker build -t wonderfall/nextcloud .
-```
-
-The building process can take some time.
+You will have to build yourself using an Alpine-ARM image, like `orax/alpine-armhf:edge`.
 
 ### Configure
 In the admin panel, you should switch from `AJAX cron` to `cron` (system cron).
@@ -136,72 +125,27 @@ Pull a newer image, then recreate the container as you did before (*Setup* step)
 ### Docker-compose
 I advise you to use [docker-compose](https://docs.docker.com/compose/), which is a great tool for managing containers. You can create a `docker-compose.yml` with the following content (which must be adapted to your needs) and then run `docker-compose up -d nextcloud-db`, wait some 15 seconds for the database to come up, then run everything with `docker-compose up -d`, that's it! On subsequent runs,  a single `docker-compose up -d` is sufficient!
 
-#### Docker-compose file V2
-```
-version: '2'
+#### Docker-compose file
+Don't copy/paste without thinking! It is a model so you can see how to do it correctly.
 
-volumes:
-  nextcloud-db-data:
-  nextcloud-data:
-  nextcloud-config:
-  nextcloud-apps:
-
-services:
-  nextcloud-db:
-    image: mariadb
-    volumes:
-      - nextcloud-db-data:/var/lib/mysql
-    environment:
-      - MYSQL_ROOT_PASSWORD=1234
-      - MYSQL_DATABASE=nextcloud
-      - MYSQL_USER=nextcloud
-      - MYSQL_PASSWORD=foo5678
-
-  nextcloud:
-    image: wonderfall/nextcloud
-    environment:
-      - UID=1000
-      - GID=1000
-      - UPLOAD_MAX_SIZE=10G
-      - APC_SHM_SIZE=128M
-      - OPCACHE_MEM_SIZE=128
-      - REDIS_MAX_MEMORY=64mb
-      - CRON_PERIOD=15m
-      - TZ=Europe/Berlin
-      - ADMIN_USER=admin
-      - ADMIN_PASSWORD=admin
-      - DB_TYPE=mysql
-      - DB_NAME=nextcloud
-      - DB_USER=nextcloud
-      - DB_PASSWORD=foo5678
-      - DB_HOST=nextcloud-db
-    depends_on:
-      - nextcloud-db
-    volumes:
-      - nextcloud-data:/data
-      - nextcloud-config:/config
-      - nextcloud-apps:/apps2
-#   ports:
-#     - 8888:8888
-```
-
-#### Docker-compose file V1
 ```
 nextcloud:
   image: wonderfall/nextcloud
   links:
-    - nextcloud-db:nextcloud-db
+    - nextcloud-db:nextcloud-db   # If using MySQL
+    - solr:solr                   # If using Nextant
+    - redis:redis                 # If using Redis
   environment:
     - UID=1000
     - GID=1000
     - UPLOAD_MAX_SIZE=10G
     - APC_SHM_SIZE=128M
     - OPCACHE_MEM_SIZE=128
-    - REDIS_MAX_MEMORY=64mb
     - CRON_PERIOD=15m
     - TZ=Europe/Berlin
-    - ADMIN_USER=admin
-    - ADMIN_PASSWORD=admin
+    - ADMIN_USER=admin            # Don't set to configure through browser
+    - ADMIN_PASSWORD=admin        # Don't set to configure through browser
+    - DOMAIN=localhost
     - DB_TYPE=mysql
     - DB_NAME=nextcloud
     - DB_USER=nextcloud
@@ -211,7 +155,9 @@ nextcloud:
     - /mnt/nextcloud/data:/data
     - /mnt/nextcloud/config:/config
     - /mnt/nextcloud/apps:/apps2
+    - /mnt/nextcloud/themes:/nextcloud/themes
 
+# If using MySQL
 nextcloud-db:
   image: mariadb:10
   volumes:
@@ -221,9 +167,46 @@ nextcloud-db:
     - MYSQL_DATABASE=nextcloud
     - MYSQL_USER=nextcloud
     - MYSQL_PASSWORD=supersecretpassword
+    
+# If using Nextant
+solr:
+  image: solr:6-alpine
+  container_name: solr
+  volumes:
+    - /mnt/docker/solr:/opt/solr/server/solr/mycores
+  entrypoint:
+    - docker-entrypoint.sh
+    - solr-precreate
+    - nextant
+
+# If using Redis
+redis:
+  image: redis:alpine
+  container_name: redis
+  volumes:
+    - /mnt/docker/redis:/data
 ```
 
 You can update everything with `docker-compose pull` followed by `docker-compose up -d`.
+
+### How to configure Redis
+Redis can be used for distributed and file locking cache, alongside with APCu (local cache), thus making Nextcloud even more faster. As PHP redis extension is already included, all you have to is to deploy a redis server (you can do as above with docker-compose) and bind it to nextcloud in your config.php file :
+
+```
+'memcache.distributed' => '\OC\Memcache\Redis',
+'memcache.locking' => '\OC\Memcache\Redis',
+'memcache.local' => '\OC\Memcache\APCu',
+'redis' => array(
+   'host' => 'redis',
+   'port' => 6379,
+   ),
+```
+
+### How to configure Nextant
+You will have to deploy a Solr server, I've shown an example above with docker-compose. Once Nextant app is installed, go to "additional settings" in your admin pannel and use http://solr:8983/solr as "Adress of your Solr Servlet". There you go. You may however experience the same issue as mine : https://github.com/nextcloud/server/pull/3160 (let's hope there'll be at least a backport...).
+
+### Tip : how to use occ command
+There is a script for that, so you shouldn't bother to log into the container, set the right permissions, and so on. Use `docker exec -ti nexcloud occ command`.
 
 ### Reverse proxy
 Of course you can use your own solution to do so! nginx, Haproxy, Caddy, h2o, there's plenty of choices and documentation about it on the Web.

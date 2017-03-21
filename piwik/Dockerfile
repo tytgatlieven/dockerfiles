@@ -1,47 +1,45 @@
-FROM alpine:3.4
-MAINTAINER Wonderfall <wonderfall@mondedie.fr>
+FROM alpine:edge
 
-ARG VERSION=2.17.0
-
+ARG VERSION=3.0.2
 ARG GPG_matthieu="814E 346F A01A 20DB B04B  6807 B5DB D592 5590 A237"
 
 ENV UID=991 GID=991
 
-RUN echo "@commuedge https://nl.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories \
+RUN echo "@testing https://nl.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories \
  && BUILD_DEPS=" \
     git \
     tar \
     build-base \
     autoconf \
     geoip-dev \
-    openssl \
+    libressl \
     ca-certificates \
     gnupg" \
- && apk -U add \
+ && apk -U upgrade && apk add \
     ${BUILD_DEPS} \
     nginx \
     s6 \
     su-exec \
     geoip \
-    php7-fpm@commuedge \
-    php7-gd@commuedge \
-    php7-curl@commuedge \
-    php7-session@commuedge \
-    php7-json@commuedge \
-    php7-ctype@commuedge \
-    php7-mbstring@commuedge \
-    php7-iconv@commuedge \
-    php7-zlib@commuedge \
-    php7-dom@commuedge \
-    php7-openssl@commuedge \
-    php7-mysqli@commuedge \
-    php7-pdo_mysql@commuedge \
-    php7-dev@commuedge \
-    php7-pear@commuedge \
- && cd /tmp && git clone https://github.com/Zakay/geoip && cd geoip \
- && phpize7 && ./configure --with-php-config=/usr/bin/php-config7 && make && make install \
- && echo 'extension=geoip.so' >> /etc/php7/conf.d/00_geoip.ini \
- && echo 'geoip.custom_directory=/piwik/misc' >> /etc/php7/php.ini \
+    tzdata \
+    php7.1-fpm@testing \
+    php7.1-gd@testing \
+    php7.1-curl@testing \
+    php7.1-session@testing \
+    php7.1-json@testing \
+    php7.1-ctype@testing \
+    php7.1-mbstring@testing \
+    php7.1-iconv@testing \
+    php7.1-zlib@testing \
+    php7.1-dom@testing \
+    php7.1-openssl@testing \
+    php7.1-mysqli@testing \
+    php7.1-pdo_mysql@testing \
+    php7.1-dev@testing \
+    php7.1-pear@testing \
+ && sed -i "$ s|\-n||g" /usr/bin/pecl && pecl install geoip-1.1.1 \
+ && echo 'extension=geoip.so' >> /etc/php7.1/conf.d/00_geoip.ini \
+ && echo 'geoip.custom_directory=/piwik/misc' >> /etc/php7.1/php.ini \
  && mkdir /piwik && cd /tmp \
  && PIWIK_TARBALL="piwik-${VERSION}.tar.gz" \
  && wget -q https://builds.piwik.org/${PIWIK_TARBALL} \
@@ -58,14 +56,11 @@ RUN echo "@commuedge https://nl.alpinelinux.org/alpine/edge/community" >> /etc/a
  && wget -q https://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz -P /piwik/misc \
  && gzip -d /piwik/misc/GeoLiteCity.dat.gz \
  && mv /piwik/misc/GeoLiteCity.dat /piwik/misc/GeoIPCity.dat \
- && cd /piwik/libs/MaxMindGeoIP && rm geoip.inc \
- && wget -q https://raw.githubusercontent.com/cerlestes/piwik/cerlestes-patch-1/libs/MaxMindGeoIP/geoip.inc \
- && chmod +x geoip.inc \
- && apk del ${BUILD_DEPS} php7-dev php7-pear \
+ && apk del ${BUILD_DEPS} php7.1-dev php7.1-pear \
  && rm -rf /var/cache/apk/* /tmp/* /root/.gnupg
 
 COPY nginx.conf /etc/nginx/nginx.conf
-COPY php-fpm.conf /etc/php7/php-fpm.conf
+COPY php-fpm.conf /etc/php7.1/php-fpm.conf
 COPY s6.d /etc/s6.d
 COPY run.sh /usr/local/bin/run.sh
 
@@ -76,6 +71,7 @@ VOLUME /config
 EXPOSE 8888
 
 LABEL description "Open web analytics platform" \
-      piwik "Piwik v${VERSION}"
+      piwik "Piwik v${VERSION}" \
+      maintainer="Wonderfall <wonderfall@targaryen.house>"
 
 CMD ["run.sh"]

@@ -1,4 +1,4 @@
-FROM alpine:3.4
+FROM alpine:edge
 MAINTAINER Wonderfall <wonderfall@schrodinger.io>
 
 ARG GPG_rainloop="3B79 7ECE 694F 3B7B 70F3  11A4 ED7C 49D9 87DA 4591"
@@ -23,7 +23,6 @@ RUN echo "@commuedge https://nl.alpinelinux.org/alpine/edge/community" >> /etc/a
     php7-pdo_pgsql@commuedge \
     php7-pdo_sqlite@commuedge \
     php7-sqlite3@commuedge \
-
  && cd /tmp \
  && wget -q http://repository.rainloop.net/v2/webmail/rainloop-community-latest.zip \
  && wget -q http://repository.rainloop.net/v2/webmail/rainloop-community-latest.zip.asc \

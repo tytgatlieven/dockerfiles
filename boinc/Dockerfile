@@ -1,11 +1,10 @@
 FROM alpine:3.4
-MAINTAINER Wonderfall <wonderfall@schrodinger.io>
 
 ARG BUILD_CORES
 
 ENV UID=991 GID=991
 
-RUN echo "@community https://nl.alpinelinux.org/alpine/v3.4/community" >> /etc/apk/repositories \
+RUN echo "@community https://nl.alpinelinux.org/alpine/v3.5/community" >> /etc/apk/repositories \
  && NB_CORES=${BUILD_CORES-`getconf _NPROCESSORS_CONF`} \
  && BUILD_DEPS=" \
     build-base \
@@ -38,5 +37,7 @@ COPY run.sh /usr/local/bin/run.sh
 RUN chmod +x /usr/local/bin/run.sh
 
 VOLUME /boinc
+
+LABEL maintainer="Wonderfall <wonderfall@targaryen.house>"
 
 ENTRYPOINT ["run.sh"]
