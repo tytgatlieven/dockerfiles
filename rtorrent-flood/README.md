@@ -21,7 +21,11 @@
 - **GID** : group id (defaut : 991)
 - **FLOOD_SECRET** : flood secret key (defaut : mysupersecretkey) (CHANGE IT)
 - **CONTEXT_PATH** : context path (base_URI) (default : /)
+- **RTORRENT_SCGI** : SCGI port (default : 0 for use local socket)
 - **PKG_CONFIG_PATH** : `/usr/local/lib/pkgconfig` (don't touch)
+
+### Note
+Run this container with tty mode enabled. In your `docker-compose.yml`, add `tty: true`. If you don't do this, [rtorrent will use 100% of CPU](https://github.com/Wonderfall/dockerfiles/issues/156).
 
 #### Ports
 - **49184** (bind it).

@@ -12,8 +12,8 @@
 **This image was made for my own use and I have no intention to make this official. Support won't be regular so if there's an update, or a fix, you can open a pull request. Any contribution is welcome, but please be aware I'm very busy currently. Before opening an issue, please check if there's already one related. Also please use Github instead of Docker Hub, otherwise I won't see your comments. Thanks.**
 
 ### Features
-- Based on Alpine Linux Edge.
-- Bundled with nginx and PHP 7.1.
+- Based on Alpine Linux.
+- Bundled with nginx and PHP 7.1 (wonderfall/nginx-php image).
 - Automatic installation using environment variables.
 - Package integrity (SHA512) and authenticity (PGP) checked during building process.
 - Data and apps persistence.
@@ -26,8 +26,9 @@
 - Environment variables provided (see below).
 
 ### Tags
-- **latest** : latest stable version. (11.0)
-- **11.0** : latest 11.0.x version (stable)
+- **latest** : latest stable version. (12.0)
+- **12.0** : latest 12.0.x version (stable)
+- **11.0** : latest 11.0.x version (old stable)
 - **10.0** : latest 10.0.x version (old stable) (unmaintained)
 - **9.0** : latest 9.0.x version. (old stable) (unmaintained)
 - **daily** : latest code (daily build).
@@ -45,6 +46,7 @@ Other tags than `daily` are built weekly. For security reasons, you should occas
 - **UPLOAD_MAX_SIZE** : maximum upload size *(default : 10G)*
 - **APC_SHM_SIZE** : apc memory size *(default : 128M)*
 - **OPCACHE_MEM_SIZE** : opcache memory size in megabytes *(default : 128)*
+- **MEMORY_LIMIT** : php memory limit *(default : 512M)*
 - **CRON_PERIOD** : time interval between two cron tasks *(default : 15m)*
 - **CRON_MEMORY_LIMIT** : memory limit for PHP when executing cronjobs *(default : 1024m)*
 - **TZ** : the system/log timezone *(default : Etc/UTC)*
@@ -67,6 +69,7 @@ Don't forget to use a **strong password** for the admin account!
 - **/config** : config.php location.
 - **/apps2** : Nextcloud downloaded apps.
 - **/nextcloud/themes** : Nextcloud themes location.
+- **/php/session** : php session files.
 
 ### Database
 Basically, you can use a database instance running on the host or any other machine. An easier solution is to use an external database container. I suggest you to use MariaDB, which is a reliable database server. You can use the official `mariadb` image available on Docker Hub to create a database container, which must be linked to the Nextcloud container. PostgreSQL can also be used as well.
@@ -74,7 +77,7 @@ Basically, you can use a database instance running on the host or any other mach
 ### Setup
 Pull the image and create a container. `/mnt` can be anywhere on your host, this is just an example. Change `MYSQL_ROOT_PASSWORD` and `MYSQL_PASSWORD` values (mariadb). You may also want to change UID and GID for Nextcloud, as well as other variables (see *Environment Variables*).
 
-````
+```
 docker pull wonderfall/nextcloud:10.0 && docker pull mariadb:10
 
 docker run -d --name db_nextcloud \

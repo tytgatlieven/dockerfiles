@@ -2,7 +2,7 @@ FROM alpine:edge
 
 ENV UID=991 GID=991
 
-ARG NGINX_VERSION=1.11.11
+ARG NGINX_VERSION=1.11.13
 ARG GPG_NGINX="B0F4 2533 73F8 F6F5 10D4  2178 520A 9993 A1C0 52F8"
 ARG BUILD_CORES
 
@@ -19,7 +19,6 @@ ARG NGINX_MODULES=" \
     --without-http_uwsgi_module \
     --without-http_geo_module \
     --without-http_autoindex_module \
-    --without-http_map_module \
     --without-http_split_clients_module \
     --without-http_memcached_module \
     --without-http_empty_gif_module \
